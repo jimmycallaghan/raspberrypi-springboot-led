@@ -31,7 +31,7 @@ public class FlashLED {
             Thread.sleep(5 * 60 * 1000);
 
         } catch (Exception e) {
-
+            logger.error("Something went wrong", e);
         } finally {
             if (gpio !=null) gpio.shutdown();
         }
