@@ -1,6 +1,8 @@
 package com.jimbo.raspi.led;
 
 import com.pi4j.io.gpio.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -8,23 +10,34 @@ import javax.annotation.PostConstruct;
 @Service
 public class FlashLED {
 
+    private static final Logger logger = LogManager.getLogger(FlashLED.class.getName());
+
     @PostConstruct
-    public void run() throws Exception {
+    public void run() {
 
-        // Create GPIO controller
-        final GpioController gpio = GpioFactory.getInstance();
+        final GpioController gpio;
 
-        // provision gpio pin #01 as an output pin and turn on
-        final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17, "MyLED", PinState.HIGH);
+        try {
+            gpio = GpioFactory.getInstance();
+            final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17, "MyLED", PinState.HIGH);
 
-        // set shutdown state for this pin
-        pin.setShutdownOptions(true, PinState.LOW);
+            // set shutdown state for this pin
+            pin.setShutdownOptions(true, PinState.LOW);
 
-        System.out.println("--> GPIO state should be: ON");
+            logger.info("--> GPIO state should toggle every second, for five minutes.");
+            pin.blink(1000);
 
-        pin.blink(1000);
+            // Just keep the service running for 5 minutes
+            Thread.sleep(5 * 60 * 1000);
 
-        
+        } catch (Exception e) {
+
+        } finally {
+            if (gpio !=null) gpio.shutdown();
+        }
+
+
+
 
     }
 }
